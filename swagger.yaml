@@ -517,4 +517,3 @@ components:
         role:
           type: string
           example: ROLE_TEACHER
-        
