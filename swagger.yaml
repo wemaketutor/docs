@@ -343,6 +343,9 @@ paths:
                 name:
                   type: string
                   example: напоминание
+                getingPersonId:
+                  type: integer
+                  example: 1
       responses:
         '200':
           description: Успешный ответ с информацией о событии
@@ -421,6 +424,9 @@ paths:
                 description:
                   type: string
                   example: сходить на занятие
+                getingPersonId:
+                  type: integer
+                  example: 1
       responses:
         '200':
           description: Успешное обновление
@@ -529,11 +535,20 @@ components:
           type: string
           format: 2024-12-26T15:00:00
           example: 2024-12-26T15:00:00
+        folowed_user:
+          $ref: "#/components/schemas/User"
         
     Events:
-      type: array
-      items:
-        $ref: "#/components/schemas/Event"
+      type: object
+      properties:
+        ownerEvents:
+          type: array
+          items:
+            $ref: "#/components/schemas/Event"
+        followerEvents:
+          type: array
+          items:
+            $ref: "#/components/schemas/Event"
         
     Error:
       type: object
