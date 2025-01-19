@@ -3,7 +3,7 @@ info:
   title: Tutoring Assistant OpenAPI спецификация
   version: 0.0.1
 servers:
-  - url: http://localhost:8080
+  - url: http://localhost:8081
     description: Dev server
 paths:
   /registration:
@@ -242,6 +242,64 @@ paths:
         - bearerAuth: []
       tags: 
         - Events
+      responses:
+        '200':
+          description: Успешный ответ со списком событий
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Events"
+        'default':
+          description: Всё нестандартное
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+                
+  /myteacher/{teacher_id}/events:
+    get:
+      summary: Метод получения событий определённого учителя ученика
+      security:
+        - bearerAuth: []
+      tags:
+        - Student
+      parameters:
+        - name: teacher_id
+          in: path
+          required: true
+          description: Идентификатор учителя
+          schema:
+            type: integer
+          example: 2
+      responses:
+        '200':
+          description: Успешный ответ со списком событий
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Events"
+        'default':
+          description: Всё нестандартное
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  
+  /mystudent/{student_id}/events:
+    get:
+      summary: Метод получения событий определённого ученика учителя
+      security:
+        - bearerAuth: []
+      tags:
+        - Teacher
+      parameters:
+        - name: student_id
+          in: path
+          required: true
+          description: Идентификатор ученика
+          schema:
+            type: integer
+          example: 2
       responses:
         '200':
           description: Успешный ответ со списком событий
@@ -517,3 +575,4 @@ components:
         role:
           type: string
           example: ROLE_TEACHER
+        
