@@ -505,7 +505,7 @@ components:
         role:
           type: string
           example: ROLE_TEACHER
-        extra_info:
+        extraInfo:
           type: string
           example: Репетитор со стажем 3 года...
         avatar:
