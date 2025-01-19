@@ -3,7 +3,7 @@ info:
   title: Tutoring Assistant OpenAPI спецификация
   version: 0.0.1
 servers:
-  - url: http://localhost:8081
+  - url: http://localhost:8081/api
     description: Dev server
 paths:
   /registration:
@@ -124,6 +124,46 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+                
+  /profile/update:
+    put:
+      summary: Метод обновления профиля
+      security:
+        - bearerAuth: []
+      tags: 
+        - Profile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+                  description: Аватар пользователя
+                firstName:
+                  type: string
+                  example: Иван
+                lastName:
+                  type: string
+                  example: Иванов
+                extraInfo:
+                  type: string
+                  example: гений, миллиардер, плейбой, филантроп
+      responses:
+        '200':
+          description: Успешное обновление
+          content:
+            application/json: {}
+        'default':
+          description: Всё нестандартное
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      
 
   /teacher/students:
     get:
@@ -468,6 +508,9 @@ components:
         extra_info:
           type: string
           example: Репетитор со стажем 3 года...
+        avatar:
+          type: string
+          example: src/main/resources/static/images/avatars/image.jpg
           
     Student:
       type: object
