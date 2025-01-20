@@ -386,6 +386,10 @@ paths:
                 getingPersonId:
                   type: integer
                   example: 1
+                duration:
+                  type: string
+                  format: 2024-12-26T15:00:00
+                  example: 2024-12-26T15:00:00
       responses:
         '200':
           description: Успешный ответ с информацией о событии
@@ -467,6 +471,11 @@ paths:
                 getingPersonId:
                   type: integer
                   example: 1
+                duration:
+                  type: string
+                  format: 2024-12-26T15:00:00
+                  example: 2024-12-26T15:00:00
+                  
       responses:
         '200':
           description: Успешное обновление
@@ -575,6 +584,10 @@ components:
           format: 2024-12-26T15:00:00
           example: 2024-12-26T15:00:00
         update_at:
+          type: string
+          format: 2024-12-26T15:00:00
+          example: 2024-12-26T15:00:00
+        duration:
           type: string
           format: 2024-12-26T15:00:00
           example: 2024-12-26T15:00:00
