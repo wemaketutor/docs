@@ -73,7 +73,7 @@ paths:
       tags:
         - Auth
       operationId: logoutUser
-      parameters: []
+      parameters: [ ]
       responses:
         '200':
           description: Successful operation
@@ -87,7 +87,7 @@ paths:
   /profile:
     get:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Profile
       responses:
@@ -108,7 +108,7 @@ paths:
                 $ref: '#/components/schemas/Error'
     put:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Profile
       operationId: changeUser
@@ -269,6 +269,33 @@ paths:
         - bearerAuth: [ ]
       tags:
         - Teachers
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Номер страницы для пагинации.
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+          description: Количество элементов на странице.
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+          description: Поле для сортировки (например, firstName, lastName, email).
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+            enum: [ asc, desc ]
+          description: Порядок сортировки (asc - по возрастанию, desc - по убыванию).
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Поисковая строка для фильтрации учителей по имени, фамилии или email.
       responses:
         '200':
           description: Successful operation
@@ -321,7 +348,7 @@ paths:
   /teacher/students:
     get:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Teacher
       responses:
@@ -345,7 +372,7 @@ paths:
                 $ref: '#/components/schemas/Error'
     post:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Teacher
       requestBody:
@@ -406,7 +433,7 @@ paths:
   /teacher/students/{student_id}:
     get:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Teacher
       parameters:
@@ -444,7 +471,7 @@ paths:
                 $ref: '#/components/schemas/Error'
     delete:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Teacher
       parameters:
@@ -480,9 +507,42 @@ paths:
   /lessons/:
     get:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Lessons
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Номер страницы для пагинации.
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+          description: Количество элементов на странице.
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+          description: Поле для сортировки (например, name, date).
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+            enum: [ asc, desc ]
+          description: Порядок сортировки (asc - по возрастанию, desc - по убыванию).
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: Поисковая строка для фильтрации по имени урока.
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date-time
+          description: Фильтрация по дате урока.
       responses:
         '200':
           description: Successful operation
@@ -498,7 +558,7 @@ paths:
                 $ref: '#/components/schemas/Error'
     post:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Lessons
       requestBody:
@@ -565,7 +625,7 @@ paths:
   /lesson/{lesson_id}:
     delete:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Lessons
       parameters:
@@ -598,7 +658,7 @@ paths:
                 $ref: '#/components/schemas/Error'
     put:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Lessons
       requestBody:
@@ -658,7 +718,7 @@ paths:
     post:
       summary: Ученик забирает свободное время учителя.
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Lessons
       parameters:
@@ -704,6 +764,8 @@ paths:
       summary: Поменяться уроками с другим учеником.
       security:
         - bearerAuth: [ ]
+      tags:
+        - Lessons
       parameters:
         - in: path
           name: lessonId
@@ -749,6 +811,8 @@ paths:
       summary: Подтвердить или отклонить запрос на обмен уроками.
       security:
         - bearerAuth: [ ]
+      tags:
+        - Lessons
       parameters:
         - in: path
           name: lessonId
@@ -787,7 +851,7 @@ paths:
   /homeworks:
     get:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Homeworks
       parameters:
@@ -805,7 +869,29 @@ paths:
           name: page
           schema:
             type: integer
-          required: true
+          description: Номер страницы для пагинации.
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+          description: Количество элементов на странице.
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+          description: Поле для сортировки (например, dueDate, status).
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+            enum: [ asc, desc ]
+          description: Порядок сортировки (asc - по возрастанию, desc - по убыванию).
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [ not_done, pending, completed ]
+          description: Фильтрация по статусу домашнего задания.
       responses:
         '200':
           description: Successful operation
@@ -831,10 +917,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
     post:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Homeworks
       requestBody:
@@ -883,7 +968,7 @@ paths:
   /homeworks/{homework_id}:
     get:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Homeworks
       parameters:
@@ -920,7 +1005,7 @@ paths:
                 $ref: '#/components/schemas/Error'
     put:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Homeworks
       parameters:
@@ -969,7 +1054,7 @@ paths:
                 $ref: '#/components/schemas/ValidationError'
     delete:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Homeworks
       parameters:
@@ -1003,7 +1088,7 @@ paths:
   /homeworks/{homework_id}/status:
     patch:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Homeworks
       parameters:
@@ -1056,7 +1141,7 @@ paths:
   /homeworks/{homework_id}/grade:
     patch:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Homeworks
       parameters:
@@ -1114,7 +1199,7 @@ paths:
   /materials:
     get:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Materials
       parameters:
@@ -1127,7 +1212,7 @@ paths:
           name: studentId
           schema:
             type: integer
-          description: ID ученика, для которого запрашиваются материалы.
+            description: ID ученика, для которого запрашиваются материалы.
         - in: query
           name: isPublic
           schema:
@@ -1137,6 +1222,28 @@ paths:
           name: page
           schema:
             type: integer
+          description: Номер страницы для пагинации.
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+          description: Количество элементов на странице.
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+          description: Поле для сортировки (например, title, description).
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+            enum: [ asc, desc ]
+          description: Порядок сортировки (asc - по возрастанию, desc - по убыванию).
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Поисковая строка для фильтрации по названию или описанию материала.
       responses:
         '200':
           description: Successful operation
@@ -1164,7 +1271,7 @@ paths:
                 $ref: '#/components/schemas/ValidationError'
     post:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Materials
       requestBody:
@@ -1201,7 +1308,7 @@ paths:
   /materials/{materialId}:
     get:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Materials
       parameters:
@@ -1230,7 +1337,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
     put:
       security:
         - bearerAuth: [ ]
@@ -1280,7 +1386,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-
     delete:
       security:
         - bearerAuth: [ ]
@@ -1317,7 +1422,7 @@ paths:
   /materials/generate-pdf:
     post:
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       tags:
         - Materials
       parameters:
