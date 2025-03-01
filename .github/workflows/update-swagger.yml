@@ -23,7 +23,7 @@ jobs:
           SWAGGER_YAML: "swagger.yaml"
         run: |
           # Delete the dist directory and index.html
-          rm -fr dist index.html
+          rm -rf dist index.html
           # Download the release
           curl -sL -o $RELEASE_TAG https://api.github.com/repos/swagger-api/swagger-ui/tarball/$RELEASE_TAG
           # Extract the dist directory
