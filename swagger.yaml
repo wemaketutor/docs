@@ -1377,6 +1377,10 @@ components:
           type: string
           example: 1234567890
 
+    Roles:
+      type: string
+      enum: [ teacher, student ]
+
     Registration:
       type: object
       required:
@@ -1391,8 +1395,7 @@ components:
           type: string
           example: 12345
         role:
-          type: string
-          example: ROLE_TEACHER
+          $ref: "#/components/schemas/Roles"
 
     User:
       type: object
@@ -1419,6 +1422,8 @@ components:
         phone:
           type: string
           example: '12345'
+        role:
+          $ref: "#/components/schemas/Roles"
 
     Student:
       type: object
