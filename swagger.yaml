@@ -149,7 +149,7 @@ paths:
             type: string
       responses:
         '200':
-          description: successful operation
+          description: Successful operation
           content:
             application/json:
               schema:
@@ -258,6 +258,61 @@ paths:
                 $ref: '#/components/schemas/Error'
         '404':
           description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /teachers:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Teachers
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Teacher'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /teachers/{teacherId}:
+    get:
+      summary: Получение информации об учителе по ID
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Teachers
+      parameters:
+        - in: path
+          name: teacherId
+          schema:
+            type: integer
+          required: true
+          description: ID учителя
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Teacher'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Teacher not found
           content:
             application/json:
               schema:
@@ -599,6 +654,135 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+  /lessons/{lessonId}/take:
+    post:
+      summary: Ученик забирает свободное время учителя.
+      security:
+        - bearerAuth: []
+      tags:
+        - Lessons
+      parameters:
+        - in: path
+          name: lessonId
+          schema:
+            type: integer
+            required: true
+          description: ID свободного урока, который нужно забрать.
+        - in: query
+          name: studentId
+          schema:
+            type: integer
+            required: true
+          description: ID ученика, забирающего время.
+      responses:
+        '200':
+          description: Время успешно забрано учеником.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lesson'
+        '400':
+          description: Урок не свободен, или ученик уже записан на это время, или другие ошибки.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Урок не найден.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /lessons/{lessonId}/switch:
+    post:
+      summary: Поменяться уроками с другим учеником.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - in: path
+          name: lessonId
+          schema:
+            type: integer
+            required: true
+          description: ID урока, которым хочет поменяться ученик.
+        - in: query
+          name: studentId
+          schema:
+            type: integer
+            required: true
+          description: ID ученика, который хочет поменяться.
+        - in: query
+          name: otherStudentId
+          schema:
+            type: integer
+            required: true
+          description: ID ученика, с которым нужно поменяться.
+      responses:
+        '200':
+          description: Запрос на обмен успешно создан и отправлен другому ученику.
+        '400':
+          description: Условия для обмена не соблюдены (учитель запретил, время обмена истекло и т.д.).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Урок или ученики не найдены.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /lessons/{lessonId}/approve-switch:
+    post:
+      summary: Подтвердить или отклонить запрос на обмен уроками.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - in: path
+          name: lessonId
+          schema:
+            type: integer
+            required: true
+          description: ID урока, по которому был запрос на обмен.
+        - in: query
+          name: studentId
+          schema:
+            type: integer
+            required: true
+          description: ID ученика, который должен подтвердить/отклонить запрос.
+        - in: query
+          name: approve
+          schema:
+            type: boolean
+            required: true
+          description: Подтвердить (true) или отклонить (false) запрос.
+      responses:
+        '200':
+          description: Запрос успешно обработан.
+        '400':
+          description: Ошибка при обработке запроса.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Урок или ученик не найдены.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /homeworks:
     get:
@@ -978,7 +1162,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-
     post:
       security:
         - bearerAuth: []
@@ -1015,7 +1198,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
-
   /materials/{materialId}:
     get:
       security:
@@ -1028,10 +1210,10 @@ paths:
           schema:
             type: integer
           required: true
-          description: ID материала
+          description: Material Id
       responses:
         '200':
-          description: Успешный запрос
+          description: Successful operation
           content:
             application/json:
               schema:
@@ -1043,7 +1225,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Материал не найден
+          description: Material not found
           content:
             application/json:
               schema:
@@ -1060,7 +1242,7 @@ paths:
           schema:
             type: integer
           required: true
-          description: ID материала
+          description: Material Id
       requestBody:
         required: true
         content:
@@ -1087,7 +1269,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Материал не найден.
+          description: Material not found
           content:
             application/json:
               schema:
@@ -1110,7 +1292,7 @@ paths:
           schema:
             type: integer
           required: true
-          description: ID материала
+          description: Material Id
       responses:
         '204':
           description: Successful removal
@@ -1132,7 +1314,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
   /materials/generate-pdf:
     post:
       security:
@@ -1271,6 +1452,32 @@ components:
           items:
             $ref: "#/components/schemas/Student"
 
+    Teacher:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID учителя.
+          readOnly: true
+        firstName:
+          type: string
+          description: Имя учителя.
+        lastName:
+          type: string
+          description: Фамилия учителя.
+        email:
+          type: string
+          format: email
+          description: Email учителя.
+
+    Teachers:
+      type: object
+      properties:
+        students:
+          type: array
+          items:
+            $ref: "#/components/schemas/Teachers"
+
     Lesson:
       type: object
       required:
@@ -1336,32 +1543,35 @@ components:
       properties:
         id:
           type: integer
-          description: ID домашнего задания.
+          description: ID домашнего задания
           readOnly: true
         title:
           type: string
-          description: Заголовок домашнего задания.
+          description: Заголовок домашнего задания
         description:
           type: string
-          description: Описание домашнего задания.
+          description: Описание домашнего задания
         dueDate:
           type: string
           format: date-time
-          description: Дата выполнения домашнего задания.
+          description: Дата выполнения домашнего задания
         studentId:
           type: integer
-          description: ID ученика, которому назначено задание.
+          description: ID ученика, которому назначено задание
         lessonId:
           type: integer
-          description: ID урока, к которому относится задание.
+          description: ID урока, к которому относится задание
         status:
           $ref: "#/components/schemas/HomeworkStatus"
         grade:
           type: integer
-          description: Оценка за домашнее задание.  Может быть null, если не проверено.
+          description: Оценка за домашнее задание.  Может быть null, если не проверено
+        assessmentScale:
+          type: integer
+          description: Максимальная допустимая оценка за домашнее задание
         teacherComment:
           type: string
-          description: Комментарий учителя к домашнему заданию.
+          description: Комментарий учителя к домашнему заданию
 
     Homeworks:
       type: object
