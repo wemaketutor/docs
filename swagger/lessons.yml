@@ -1,0 +1,456 @@
+openapi: 3.0.3
+info:
+  title: Lessons Workspace
+  version: 0.0.1
+
+paths:
+  /lessons/:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Lessons
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Номер страницы для пагинации.
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+          description: Количество элементов на странице.
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+          description: Поле для сортировки (например, name, date).
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+            enum: [ asc, desc ]
+          description: Порядок сортировки (asc - по возрастанию, desc - по убыванию).
+        - in: query
+          name: name
+          schema:
+            type: string
+          description: Поисковая строка для фильтрации по имени урока.
+        - in: query
+          name: date
+          schema:
+            type: string
+            format: date-time
+          description: Фильтрация по дате урока.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lessons"
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Lessons
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - date
+              properties:
+                name:
+                  type: string
+                  example: напоминание
+                date:
+                  type: string
+                  format: 2024-12-26T15:00:00
+                  example: 2024-12-26T15:00:00
+                duration:
+                  type: string
+                  format: 2024-12-26T15:00:00
+                  example: 2024-12-26T15:00:00
+                followedUserId:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Followed User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictError'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /lesson/{lesson_id}:
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Lessons
+      parameters:
+        - name: lesson_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '204':
+          description: Successful removal
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Lesson not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Lessons
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - lesson_id
+                - name
+                - description
+                - date
+              properties:
+                lesson_id:
+                  type: integer
+                  example: 1
+                name:
+                  type: string
+                  example: напоминание
+                description:
+                  type: string
+                  example: сходить на занятие
+                date:
+                  type: string
+                  format: 2024-12-26T15:00:00
+                  example: 2024-12-26T15:00:00
+                duration:
+                  type: string
+                  format: 2024-12-26T15:00:00
+                  example: 2024-12-26T15:00:00
+                followedUserId:
+                  type: integer
+                  example: 1
+      responses:
+        '200':
+          description: Successful operation
+        '401':
+          description: User is not authorized
+        '403':
+          description: User does not have editing rights
+        '404':
+          description: Lesson not found
+        '409':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictError'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /lessons/{lessonId}/take:
+    post:
+      summary: Ученик забирает свободное время учителя.
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Lessons
+      parameters:
+        - in: path
+          name: lessonId
+          schema:
+            type: integer
+            required: true
+          description: ID свободного урока, который нужно забрать.
+        - in: query
+          name: studentId
+          schema:
+            type: integer
+            required: true
+          description: ID ученика, забирающего время.
+      responses:
+        '200':
+          description: Время успешно забрано учеником.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lesson'
+        '400':
+          description: Урок не свободен, или ученик уже записан на это время, или другие ошибки.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Урок не найден.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /lessons/{lessonId}/switch:
+    post:
+      summary: Поменяться уроками с другим учеником.
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Lessons
+      parameters:
+        - in: path
+          name: lessonId
+          schema:
+            type: integer
+            required: true
+          description: ID урока, которым хочет поменяться ученик.
+        - in: query
+          name: studentId
+          schema:
+            type: integer
+            required: true
+          description: ID ученика, который хочет поменяться.
+        - in: query
+          name: otherStudentId
+          schema:
+            type: integer
+            required: true
+          description: ID ученика, с которым нужно поменяться.
+      responses:
+        '200':
+          description: Запрос на обмен успешно создан и отправлен другому ученику.
+        '400':
+          description: Условия для обмена не соблюдены (учитель запретил, время обмена истекло и т.д.).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Урок или ученики не найдены.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /lessons/{lessonId}/approve-switch:
+    post:
+      summary: Подтвердить или отклонить запрос на обмен уроками.
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Lessons
+      parameters:
+        - in: path
+          name: lessonId
+          schema:
+            type: integer
+            required: true
+          description: ID урока, по которому был запрос на обмен.
+        - in: query
+          name: studentId
+          schema:
+            type: integer
+            required: true
+          description: ID ученика, который должен подтвердить/отклонить запрос.
+        - in: query
+          name: approve
+          schema:
+            type: boolean
+            required: true
+          description: Подтвердить (true) или отклонить (false) запрос.
+      responses:
+        '200':
+          description: Запрос успешно обработан.
+        '400':
+          description: Ошибка при обработке запроса.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Урок или ученик не найдены.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Lesson:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          description: ID урока.
+          readOnly: true
+        name:
+          type: string
+        description:
+          type: string
+        subject:
+          type: string
+        teacherId:
+          type: integer
+          description: ID учителя, проводящего урок.
+        startTime:
+          type: string
+          format: date-time
+          description: Время начала урока.
+        endTime:
+          type: string
+          format: date-time
+          description: Время окончания урока.
+        studentIds:
+          type: array
+          items:
+            type: integer
+            description: Список ID учеников, участвующих в уроке.
+        homeworkLink:
+          type: string
+          description: Ссылка на домашнее задание.
+        date_created:
+          type: string
+          format: 2024-12-26T15:00:00
+          example: 2024-12-26T15:00:00
+        update_at:
+          type: string
+          format: 2024-12-26T15:00:00
+          example: 2024-12-26T15:00:00
+
+    Lessons:
+      type: object
+      properties:
+        ownerLessons:
+          type: array
+          items:
+            $ref: "#/components/schemas/Lesson"
+        followerLessons:
+          type: array
+          items:
+            $ref: "#/components/schemas/Lesson"
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "The userId should be a number"
+          description: Сообщение об ошибке.
+
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+          example: "email"
+        detail:
+          type: string
+          example: "The mail is incorrect"
+
+    ConflictError:
+      type: object
+      properties:
+        detail:
+          type: string
+          example: "Email already exists"
+      required:
+        - detail
+
+    TooManyError:
+      type: object
+      properties:
+        limit:
+          type: integer
+          minimum: 1
+          example: 10
+      required:
+        - limit
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: [ ]

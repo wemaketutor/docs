@@ -1,0 +1,342 @@
+openapi: 3.0.3
+info:
+  title: Materials Workspace
+  version: 0.0.1
+
+paths:
+  /materials:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Materials
+      parameters:
+        - in: query
+          name: teacherId
+          schema:
+            type: integer
+          description: ID учителя, чьи материалы запрашиваются (только для учителя).
+        - in: query
+          name: studentId
+          schema:
+            type: integer
+            description: ID ученика, для которого запрашиваются материалы.
+        - in: query
+          name: isPublic
+          schema:
+            type: boolean
+          description: Вернуть только публичные материалы.
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Номер страницы для пагинации.
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+          description: Количество элементов на странице.
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+          description: Поле для сортировки (например, title, description).
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+            enum: [ asc, desc ]
+          description: Порядок сортировки (asc - по возрастанию, desc - по убыванию).
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Поисковая строка для фильтрации по названию или описанию материала.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Materials'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have reading rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Materials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Material'
+      responses:
+        '201':
+          description: Материал успешно добавлен.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /materials/{materialId}:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Materials
+      parameters:
+        - in: path
+          name: materialId
+          schema:
+            type: integer
+          required: true
+          description: Material Id
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+        '403':
+          description: User does not have reading rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Material not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Materials
+      parameters:
+        - in: path
+          name: materialId
+          schema:
+            type: integer
+          required: true
+          description: Material Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Material'
+      responses:
+        '200':
+          description: Материал успешно обновлен.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Material'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Material not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Materials
+      parameters:
+        - in: path
+          name: materialId
+          schema:
+            type: integer
+          required: true
+          description: Material Id
+      responses:
+        '204':
+          description: Successful removal
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Material not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /materials/generate-pdf:
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Materials
+      parameters:
+        - in: query
+          name: materialIds
+          schema:
+            type: array
+            items:
+              type: integer
+            required: true
+          description: ID material
+      responses:
+        '200':
+          description: PDF file is successfully generated and returned
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have generate file rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Material not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal error creating PDF file.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Material:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID материала.
+          readOnly: true
+        title:
+          type: string
+          description: Название материала.
+        description:
+          type: string
+          description: Описание материала.
+        fileUrl:
+          type: string
+          description: URL файла материала.
+        isPublic:
+          type: boolean
+          description: Доступен ли материал всем ученикам.
+        teacherId:
+          type: integer
+          description: ID учителя, добавившего материал.
+        studentIds:
+          type: array
+          items:
+            type: integer
+            description: Список ID учеников, которым доступен материал (если isPublic = false).
+
+    Materials:
+      type: object
+      properties:
+        students:
+          type: array
+          items:
+            $ref: "#/components/schemas/Materials"
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "The userId should be a number"
+          description: Сообщение об ошибке.
+
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+          example: "email"
+        detail:
+          type: string
+          example: "The mail is incorrect"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: [ ]
+
