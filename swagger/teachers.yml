@@ -1,0 +1,343 @@
+openapi: 3.0.3
+info:
+  title: Teachers Workspace
+  version: 0.0.1
+
+paths:
+  /teachers:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Teachers
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Номер страницы для пагинации.
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+          description: Количество элементов на странице.
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+          description: Поле для сортировки (например, firstName, lastName, email).
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+            enum: [ asc, desc ]
+          description: Порядок сортировки (asc - по возрастанию, desc - по убыванию).
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Поисковая строка для фильтрации учителей по имени, фамилии или email.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Teacher'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /teachers/{teacherId}:
+    get:
+      summary: Получение информации об учителе по ID
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Teachers
+      parameters:
+        - in: path
+          name: teacherId
+          schema:
+            type: integer
+          required: true
+          description: ID учителя
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Teacher'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Teacher not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /teacher/students:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Teacher
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Students"
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have reading rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Teacher
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  example: student@gmail.com
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Students"
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '406':
+          description: Too many students
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TooManyError'
+        '409':
+          description: Student has already been added earlier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /teacher/students/{student_id}:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Teacher
+      parameters:
+        - name: student_id
+          in: path
+          required: true
+          description: Student Id
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have reading rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Teacher
+      parameters:
+        - name: student_id
+          in: path
+          required: true
+          description: Идентификатор ученика
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '204':
+          description: Successful removal
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Teacher:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID учителя.
+          readOnly: true
+        firstName:
+          type: string
+          description: Имя учителя.
+        lastName:
+          type: string
+          description: Фамилия учителя.
+        email:
+          type: string
+          format: email
+          description: Email учителя.
+
+    Teachers:
+      type: object
+      properties:
+        students:
+          type: array
+          items:
+            $ref: "#/components/schemas/Teachers"
+
+    Student:
+      type: object
+      required:
+        - studentId
+      properties:
+        studentId:
+          type: integer
+          example: 1
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            email:
+              type: string
+              example: igor@gmail.com
+            firstName:
+              type: string
+              example: Игорь
+            lastName:
+              type: string
+              example: Игоревич
+
+    Students:
+      type: object
+      properties:
+        students:
+          type: array
+          items:
+            $ref: "#/components/schemas/Student"
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "The userId should be a number"
+          description: Сообщение об ошибке.
+
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+          example: "email"
+        detail:
+          type: string
+          example: "The mail is incorrect"
+
+    TooManyError:
+      type: object
+      properties:
+        limit:
+          type: integer
+          minimum: 1
+          example: 10
+      required:
+        - limit
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: [ ]

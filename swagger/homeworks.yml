@@ -1,0 +1,433 @@
+openapi: 3.0.3
+info:
+  title: Homeworks Workspace
+  version: 0.0.1
+
+paths:
+  /homeworks:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Homeworks
+      parameters:
+        - in: query
+          name: studentId
+          schema:
+            type: integer
+          description: ID ученика, для которого запрашиваются задания.
+        - in: query
+          name: teacherId
+          schema:
+            type: integer
+          description: ID учителя, чьи задания запрашиваются.
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Номер страницы для пагинации.
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+          description: Количество элементов на странице.
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+          description: Поле для сортировки (например, dueDate, status).
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+            enum: [ asc, desc ]
+          description: Порядок сортировки (asc - по возрастанию, desc - по убыванию).
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [ not_done, pending, completed ]
+          description: Фильтрация по статусу домашнего задания.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Homeworks"
+        '400':
+          description: Incorrect request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Student or Teacher not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Homeworks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Homework'
+      responses:
+        '201':
+          description: Домашнее задание успешно создано.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Homework'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /homeworks/{homework_id}:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Homeworks
+      parameters:
+        - in: path
+          name: homework_id
+          schema:
+            type: integer
+          required: true
+          description: ID домашнего задания
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Homework'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have reading rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Homework not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Homeworks
+      parameters:
+        - in: path
+          name: homework_id
+          schema:
+            type: integer
+          required: true
+          description: ID домашнего задания
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Homework'
+      responses:
+        '200':
+          description: Домашнее задание успешно обновлено.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Homework'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Homework not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Homeworks
+      parameters:
+        - in: path
+          name: homework_id
+          schema:
+            type: integer
+          required: true
+          description: ID домашнего задания
+      responses:
+        '204':
+          description: Successful removal
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Homework not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /homeworks/{homework_id}/status:
+    patch:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Homeworks
+      parameters:
+        - in: path
+          name: homework_id
+          schema:
+            type: integer
+          required: true
+          description: ID домашнего задания
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/HomeworkStatus'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Homework'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Домашнее задание не найдено.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /homeworks/{homework_id}/grade:
+    patch:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Homeworks
+      parameters:
+        - in: path
+          name: homework_id
+          schema:
+            type: integer
+          required: true
+          description: ID домашнего задания
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                grade:
+                  type: integer
+                  description: Оценка за домашнее задание.
+                teacherComment:
+                  type: string
+                  description: Комментарий учителя.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Homework'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Homework not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+components:
+  schemas:
+    HomeworkStatus:
+      type: string
+      enum: [ not_done, pending, completed ]
+      description: Статус домашнего задания.  (not_done - не сделано, pending - ждет проверки, completed - оценено)
+
+    Homework:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID домашнего задания
+          readOnly: true
+        title:
+          type: string
+          description: Заголовок домашнего задания
+        description:
+          type: string
+          description: Описание домашнего задания
+        dueDate:
+          type: string
+          format: date-time
+          description: Дата выполнения домашнего задания
+        studentId:
+          type: integer
+          description: ID ученика, которому назначено задание
+        lessonId:
+          type: integer
+          description: ID урока, к которому относится задание
+        status:
+          $ref: "#/components/schemas/HomeworkStatus"
+        grade:
+          type: integer
+          description: Оценка за домашнее задание.  Может быть null, если не проверено
+        assessmentScale:
+          type: integer
+          description: Максимальная допустимая оценка за домашнее задание
+        teacherComment:
+          type: string
+          description: Комментарий учителя к домашнему заданию
+
+    Homeworks:
+      type: object
+      properties:
+        students:
+          type: array
+          items:
+            $ref: "#/components/schemas/Homework"
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "The userId should be a number"
+          description: Сообщение об ошибке.
+
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+          example: "email"
+        detail:
+          type: string
+          example: "The mail is incorrect"
+
+    ConflictError:
+      type: object
+      properties:
+        detail:
+          type: string
+          example: "Email already exists"
+      required:
+        - detail
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: [ ]

@@ -1,0 +1,156 @@
+openapi: 3.0.3
+info:
+  title: Auth Workspace
+  version: 0.0.1
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Registration"
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - text
+                properties:
+                  text:
+                    type: string
+                    example: teacher@gmail.com
+        '409':
+          description: Conflict error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictError'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Login"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - accessToken
+                properties:
+                  accessToken:
+                    type: string
+                    example: eyJh...
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /auth/logout:
+    get:
+      tags:
+        - Auth
+      operationId: logoutUser
+      parameters: [ ]
+      responses:
+        '200':
+          description: Successful operation
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Roles:
+      type: string
+      enum: [ teacher, student ]
+
+    Login:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          example: foobar@gmail.com
+        password:
+          type: string
+          example: 1234567890
+
+    Registration:
+      type: object
+      required:
+        - email
+        - password
+        - role
+      properties:
+        email:
+          type: string
+          example: teacher@gmail.com
+        password:
+          type: string
+          example: 12345
+        role:
+          $ref: "#/components/schemas/Roles"
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "The userId should be a number"
+          description: Сообщение об ошибке.
+
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+          example: "email"
+        detail:
+          type: string
+          example: "The mail is incorrect"
+
+    ConflictError:
+      type: object
+      properties:
+        detail:
+          type: string
+          example: "Email already exists"
+      required:
+        - detail
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: [ ]
