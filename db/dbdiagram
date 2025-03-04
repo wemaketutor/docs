@@ -1,0 +1,107 @@
+Enum UserRoles {
+  teacher
+  student
+}
+
+Enum UserStatuses {
+  activated
+  locked
+}
+
+Table Users {
+  id integer [primary key]
+  username varchar [not null]
+  first_name varchar [not null]
+  second_name varchar [not null]
+  email varchar [not null, unique]
+  phone varchar
+  password varchar [not null]
+  avatar_url varchar
+  role Roles [not null]
+  status UserStatus [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table Students {
+  id integer [primary key]
+  user_id integer [ref: - Users.id]
+}
+
+Table Teachers {
+  id integer [primary key]
+  user_id integer [ref: - Users.id]
+}
+
+Ref: Teachers.id <> Students.id
+
+Enum HomeworkStatuses {
+  not_done
+  pending
+  completed
+}
+
+Table Homeworks {
+  id integer [primary key]
+  title varchar [not null]
+  description varchar
+  due_date datetime [not null]
+  status HomeworkStatuses [not null]
+  grade integer
+  assessment_scale integer [not null]
+  student_id integer [ref: < Students.id]
+  lesson_id integer [ref: < Lessons.id]
+}
+
+Table HomeworksMaterials {
+  id integer [primary key]
+  homework_id integer [ref: < Homeworks.id]
+  material_id integer [ref: < Materials.id]
+}
+
+Table HomeworksComments {
+  id integer [primary key]
+  homework_id integer [ref: < Homeworks.id]
+  commnet_id integer [ref: < Comments.id]
+}
+
+Table Comments {
+  id integer [primary key]
+  body text [not null]
+  user_id integer [ref: > Users.id]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table Lessons {
+  id integer [primary key]
+  name varchar [not null]
+  description varchar
+  subject varchar [not null]
+  owner_id integer [ref: < Teachers.id]
+  start_time datetime [not null]
+  end_time datetime [not null]
+  date_created timestamp
+  update_at timestamp
+}
+
+Table FollowedLessonUsers {
+  id integer [primary key]
+  lesson_id integer [ref: < Lessons.id]
+  student_id integer [ref: < Students.id]
+}
+
+Table Materials {
+  id integer [primary key]
+  title varchar [not null]
+  description varchar
+  file_url varchar [not null]
+  is_public bool [not null]
+  teacher_id integer [ref: < Teachers.id]
+}
+
+Table MaterialsVisibleByUsers {
+  id integer [primary key]
+  material_id integer [ref: < Materials.id]
+  user_id integer [ref: < Users.id]
+}
