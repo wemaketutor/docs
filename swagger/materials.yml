@@ -227,15 +227,219 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /materials/sources:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Sources
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Номер страницы для пагинации.
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+          description: Количество элементов на странице.
+        - in: query
+          name: sort_by
+          schema:
+            type: string
+          description: Поле для сортировки (например, title, description).
+        - in: query
+          name: sort_order
+          schema:
+            type: string
+            enum: [ asc, desc ]
+          description: Порядок сортировки (asc - по возрастанию, desc - по убыванию).
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Поисковая строка для фильтрации по названию или описанию source.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have reading rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Sources
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Source'
+      responses:
+        '201':
+          description: Материал успешно добавлен.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /materials/sources/{sourceId}:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Sources
+      parameters:
+        - in: path
+          name: sourceId
+          schema:
+            type: integer
+          required: true
+          description: Source Id
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '404':
+          description: Source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Sources
+      parameters:
+        - in: path
+          name: sourceId
+          schema:
+            type: integer
+          required: true
+          description: Source Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Source'
+      responses:
+        '200':
+          description: Source успешно обновлен.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Sources
+      parameters:
+        - in: path
+          name: sourceId
+          schema:
+            type: integer
+          required: true
+          description: Source Id
+      responses:
+        '204':
+          description: Successful removal
+        '401':
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: User does not have editing rights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /materials/generate-pdf:
     post:
       security:
         - bearerAuth: [ ]
       tags:
-        - Materials
+        - Sources
       parameters:
         - in: query
-          name: materialIds
+          name: sourcesIds
           schema:
             type: array
             items:
@@ -277,6 +481,31 @@ paths:
 
 components:
   schemas:
+    Source:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID source
+          readOnly: true
+        title:
+          type: string
+          description: Название source
+        description:
+          type: string
+          description: Описание source
+        body:
+          type: string
+          description: Source body
+
+    Sources:
+      type: object
+      properties:
+        students:
+          type: array
+          items:
+            $ref: "#/components/schemas/Source"
+
     Material:
       type: object
       properties:
@@ -311,7 +540,7 @@ components:
         students:
           type: array
           items:
-            $ref: "#/components/schemas/Materials"
+            $ref: "#/components/schemas/Material"
 
     Error:
       type: object
